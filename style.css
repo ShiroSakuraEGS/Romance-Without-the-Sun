@@ -1,0 +1,1052 @@
+/* ==========================================================================
+   《無日浪漫》沉浸式打字工作站與多軌同步音樂系統 - 樣式表
+   風格：夜幕都市、王家衛 × 新海誠電影色調、毛玻璃態 (Glassmorphism)、呼吸光標
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --font-serif: 'Noto Serif TC', serif;
+  --font-title: 'Cinzel', 'Noto Serif TC', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* 色彩系統：深夜墨藍、窗台琥珀光、秘銀微光 */
+  --bg-dark: #070a10;
+  --color-amber: #f7c873;
+  --color-amber-glow: rgba(247, 200, 115, 0.4);
+  --color-cyan: #64d2ff;
+  --color-cyan-glow: rgba(100, 210, 255, 0.35);
+  --panel-bg: rgba(10, 14, 23, 0.72);
+  --panel-border: rgba(247, 200, 115, 0.22);
+  --panel-border-active: rgba(247, 200, 115, 0.65);
+  --text-main: #f5f6f8;
+  --text-muted: #9ba4b5;
+  --text-whisper: #5c6475;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
+  overflow: hidden;
+  background-color: var(--bg-dark);
+  font-family: var(--font-serif);
+  color: var(--text-main);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* 主容器 (支援 iOS 安全區域) */
+#stage-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* ==========================================================================
+   全螢幕背景影片與電影感濾鏡
+   ========================================================================== */
+.video-background-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+#bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.85) contrast(1.05) saturate(1.1);
+  transform: scale(1.02); /* 微幅放大小晃動適配 */
+}
+
+/* 電影感暗角遮罩與霧氣粒子 */
+.video-overlay-tint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 40%, rgba(7, 10, 16, 0.25) 0%, rgba(7, 10, 16, 0.8) 100%);
+  z-index: 2;
+}
+
+/* ==========================================================================
+   頂部 HUD：作品標題與主唱甦醒指示儀
+   ========================================================================== */
+.top-header {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1200px;
+  padding: 24px 32px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--panel-border-active);
+  box-shadow: 0 0 16px rgba(247, 200, 115, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.brand-logo:hover {
+  transform: rotate(6deg) scale(1.08);
+  box-shadow: 0 0 24px rgba(247, 200, 115, 0.6);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-family: var(--font-title);
+  font-size: 1.45rem;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-amber) 80%, #99752b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px var(--color-amber-glow);
+}
+
+.brand-subtitle {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* 主唱動態聲量儀 (Vocals Resonance Meter) */
+.vocals-meter-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 10px 20px;
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  transition: all 0.3s ease;
+}
+
+.vocals-meter-card.awake {
+  border-color: var(--panel-border-active);
+  box-shadow: 0 0 25px rgba(247, 200, 115, 0.3);
+}
+
+.meter-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.meter-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.meter-percent {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-amber);
+}
+
+/* 跳動波形條 (Waveform Bars - GPU 硬體加速) */
+.waveform-bars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+}
+
+.wave-bar {
+  width: 3.5px;
+  height: 20px;
+  background-color: var(--color-amber);
+  border-radius: 2px;
+  transform-origin: bottom;
+  transform: scaleY(0.2);
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
+  opacity: 0.3;
+}
+
+.vocals-meter-card.awake .wave-bar {
+  opacity: 1;
+  box-shadow: 0 0 6px var(--color-amber);
+}
+
+/* ==========================================================================
+   中央與下方：詩人打字機視窗 (Flow Typer Deck)
+   ========================================================================== */
+.typer-main-stage {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.typer-card {
+  width: 100%;
+  height: 380px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 28px 32px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.typer-card:focus-within,
+.typer-card.typing-active {
+  border-color: var(--panel-border-active);
+  box-shadow: 0 16px 52px rgba(247, 200, 115, 0.15);
+}
+
+/* 打字機卡片頂部小標籤 */
+.typer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+}
+
+.typer-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.status-text-mobile {
+  display: none;
+}
+
+.status-text-desktop {
+  display: inline;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-amber);
+  box-shadow: 0 0 8px var(--color-amber);
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+.typer-stats {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* 文字輸出捲動視窗 */
+.text-stream-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 12px;
+  font-size: 1.15rem;
+  line-height: 2.1;
+  letter-spacing: 0.06em;
+  color: var(--text-main);
+  text-align: justify;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(247, 200, 115, 0.25) transparent;
+}
+
+.text-stream-viewport::-webkit-scrollbar {
+  width: 6px;
+}
+
+.text-stream-viewport::-webkit-scrollbar-thumb {
+  background: rgba(247, 200, 115, 0.25);
+  border-radius: 999px;
+}
+
+/* 打出的字元效果 */
+.char-revealed {
+  display: inline;
+  animation: char-fade-in 0.3s ease forwards;
+}
+
+@keyframes char-fade-in {
+  0% { opacity: 0; color: var(--color-amber); text-shadow: 0 0 12px var(--color-amber); }
+  100% { opacity: 1; color: var(--text-main); text-shadow: none; }
+}
+
+/* 呼吸閃爍光標 */
+.typing-cursor {
+  display: inline-block;
+  width: 2.5px;
+  height: 1.2em;
+  background-color: var(--color-amber);
+  vertical-align: text-bottom;
+  margin-left: 3px;
+  box-shadow: 0 0 8px var(--color-amber);
+  animation: blink-cursor 1s infinite;
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 初次打字提示引導 (浮動於打字框正中) */
+.typer-prompt-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  width: 80%;
+}
+
+.typer-prompt-guide.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.guide-icon {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 12px var(--color-amber-glow));
+}
+
+.guide-text {
+  font-size: 1.05rem;
+  color: var(--color-amber);
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.guide-subtext {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* 隱形接收打字的鍵盤焦點 input */
+#hidden-type-catcher {
+  position: absolute;
+  opacity: 0;
+  pointer-events: auto;
+  width: 1px;
+  height: 1px;
+  top: 0;
+  left: 0;
+}
+
+/* ==========================================================================
+   底部控制工具列 (Bottom Dock)
+   ========================================================================== */
+.bottom-dock {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1200px;
+  padding: 12px 32px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 音樂進度條 */
+.music-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 420px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  backdrop-filter: blur(12px);
+}
+
+.progress-time {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.progress-bar-container {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-cyan) 0%, var(--color-amber) 100%);
+  border-radius: 999px;
+  transition: width 0.2s linear;
+}
+
+/* 按鈕組 */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dock-btn {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text-main);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+.dock-btn:hover {
+  background: rgba(247, 200, 115, 0.15);
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(247, 200, 115, 0.2);
+}
+
+.dock-btn:active {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   初次進入引導遮罩 (Welcome Splash)
+   ========================================================================== */
+#welcome-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 7, 12, 0.85);
+  backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#welcome-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.welcome-modal {
+  max-width: 540px;
+  text-align: center;
+  padding: 44px 36px;
+  background: linear-gradient(180deg, rgba(17, 23, 36, 0.95) 0%, rgba(9, 12, 19, 0.95) 100%);
+  border: 1px solid var(--panel-border-active);
+  border-radius: 24px;
+  box-shadow: 0 0 60px rgba(247, 200, 115, 0.25);
+}
+
+.welcome-icon {
+  font-size: 3.2rem;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 16px var(--color-amber-glow));
+}
+
+.welcome-title {
+  font-family: var(--font-title);
+  font-size: 1.85rem;
+  color: var(--color-amber);
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+}
+
+.welcome-desc {
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.welcome-desc strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.start-btn {
+  background: linear-gradient(135deg, var(--color-amber) 0%, #b88a35 100%);
+  color: #080b11;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 14px 44px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  box-shadow: 0 0 25px var(--color-amber-glow);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.start-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 35px rgba(247, 200, 115, 0.7);
+}
+
+/* ==========================================================================
+   響應式設計 (RWD) - 手機、平板與各種螢幕極致適配
+   ========================================================================== */
+@media (orientation: portrait) {
+  #bg-video {
+    object-position: 20% center; /* 直向螢幕背景影片靠左並向右偏移 20%，呈現最佳角色構圖 */
+  }
+}
+
+@media (max-width: 768px) {
+  #bg-video {
+    object-position: 20% center; /* 手機端影片定位向右偏移 20%，避免角色貼邊或被裁切 */
+  }
+  .top-header {
+    padding: 12px 16px 6px;
+    gap: 10px;
+  }
+  .brand-section {
+    gap: 10px;
+  }
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+  }
+  .brand-subtitle {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    margin-top: 1px;
+  }
+  .vocals-meter-card {
+    padding: 6px 14px;
+    gap: 10px;
+  }
+  .meter-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+  }
+  .meter-percent {
+    font-size: 1.0rem;
+  }
+  .waveform-bars {
+    height: 20px;
+    gap: 3px;
+  }
+  .wave-bar {
+    width: 2.8px;
+    height: 18px;
+  }
+
+  /* 打字機卡片與舞台 */
+  .typer-main-stage {
+    padding: 0 16px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+  }
+  .typer-card {
+    height: auto;
+    max-height: calc(100dvh - 215px);
+    min-height: 180px;
+    flex: 1;
+    padding: 18px 20px;
+    border-radius: 18px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .status-text-mobile {
+    display: inline;
+  }
+  .status-text-desktop {
+    display: none;
+  }
+  .text-stream-viewport {
+    font-size: 1.02rem;
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+    padding-right: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .typer-prompt-guide {
+    width: 90%;
+  }
+  .guide-icon {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+  .guide-text {
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+  }
+  .guide-subtext {
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  /* 底部工具列 */
+  .bottom-dock {
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 16px max(14px, env(safe-area-inset-bottom, 14px));
+    width: 100%;
+  }
+  .music-progress-wrapper {
+    max-width: 100%;
+    width: 100%;
+    padding: 6px 14px;
+    gap: 8px;
+  }
+  .progress-time {
+    font-size: 0.72rem;
+  }
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px 8px;
+    width: 100%;
+  }
+  .dock-btn {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    gap: 4px;
+    min-height: 38px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dock-btn:active {
+    transform: scale(0.96);
+    background: rgba(247, 200, 115, 0.25);
+  }
+
+  /* 引導彈窗與提示訊息 */
+  .welcome-modal {
+    max-width: 92%;
+    max-height: 86dvh;
+    overflow-y: auto;
+    padding: 32px 22px;
+    border-radius: 20px;
+  }
+  .welcome-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
+  .welcome-title {
+    font-size: 1.55rem;
+    margin-bottom: 10px;
+  }
+  .welcome-desc {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    margin-bottom: 22px;
+  }
+  .start-btn {
+    padding: 12px 36px;
+    font-size: 0.98rem;
+    width: 100%;
+    max-width: 280px;
+  }
+  .toast-notification {
+    max-width: 92%;
+    padding: 10px 18px;
+    font-size: 0.84rem;
+    top: 60px;
+  }
+}
+
+/* 窄螢幕直向手機與小螢幕 (寬度 <= 480px) */
+@media (max-width: 480px) {
+  .top-header {
+    padding: 10px 12px 4px;
+    gap: 6px;
+  }
+  .brand-section {
+    gap: 8px;
+  }
+  .brand-logo {
+    width: 32px;
+    height: 32px;
+  }
+  .brand-title {
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+  }
+  .brand-subtitle {
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+  }
+  .vocals-meter-card {
+    padding: 4px 10px;
+    gap: 8px;
+  }
+  .meter-label {
+    font-size: 0.58rem;
+  }
+  .meter-percent {
+    font-size: 0.92rem;
+  }
+  .waveform-bars {
+    height: 16px;
+    gap: 2.5px;
+  }
+  .wave-bar {
+    width: 2.2px;
+    height: 14px;
+  }
+
+  .typer-main-stage {
+    padding: 0 12px 6px;
+  }
+  .typer-card {
+    padding: 14px 16px;
+    border-radius: 16px;
+    max-height: calc(100dvh - 198px);
+    min-height: 160px;
+  }
+  .text-stream-viewport {
+    font-size: 0.96rem;
+    line-height: 1.82;
+  }
+  .typer-header {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+  }
+  .typer-status {
+    font-size: 0.72rem;
+  }
+  .typer-stats {
+    font-size: 0.72rem;
+  }
+
+  .bottom-dock {
+    padding: 4px 12px max(12px, env(safe-area-inset-bottom, 12px));
+    gap: 6px;
+  }
+  .action-buttons {
+    gap: 5px 6px;
+  }
+  .dock-btn {
+    padding: 6px 9px;
+    font-size: 0.75rem;
+    min-height: 36px;
+    gap: 3px;
+  }
+  .dock-btn span {
+    font-size: 0.85rem;
+  }
+}
+
+/* 超窄小螢幕 (寬度 <= 360px，例如 Galaxy Fold 外螢幕 / iPhone SE 舊款) */
+@media (max-width: 360px) {
+  .brand-subtitle {
+    display: none;
+  }
+  .brand-title {
+    font-size: 0.98rem;
+  }
+  .vocals-meter-card {
+    padding: 3px 8px;
+  }
+  .waveform-bars {
+    display: none;
+  }
+  .dock-btn {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+  }
+}
+
+/* ==========================================================================
+   打字視窗收起至底部動畫 (讓觀眾專注畫面與音樂)
+   ========================================================================== */
+.typer-main-stage {
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+  will-change: transform, opacity;
+}
+
+.typer-main-stage.collapsed {
+  transform: translateY(calc(100% + 70px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   浮動提示通知 (Toast Notification)
+   ========================================================================== */
+.toast-notification {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: rgba(10, 14, 23, 0.9);
+  border: 1px solid var(--panel-border-active);
+  color: var(--color-amber);
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), 0 0 24px rgba(247, 200, 115, 0.25);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  font-family: var(--font-serif);
+}
+
+.toast-notification.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-28px);
+}
+
+/* ==========================================================================
+   PDF 輸出專屬排版樣式 (白櫻蒼成 · 散文手稿 · 嚴格 A4 雙頁無損排版)
+   ========================================================================== */
+.pdf-document {
+  background: #ffffff;
+  color: #1a1e24;
+  font-family: 'Noto Serif TC', 'Songti TC', 'PingFang TC', 'STSong', serif;
+  box-sizing: border-box;
+  width: 794px; /* A4 96 DPI 標準寬度 */
+  margin: 0;
+  padding: 0;
+}
+
+.pdf-page {
+  width: 794px;
+  height: 1123px; /* A4 96 DPI 標準高度 */
+  min-height: 1123px;
+  max-height: 1123px;
+  padding: 48px 56px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.pdf-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pdf-category {
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  color: #8c734b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.pdf-title {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  color: #11141a;
+  margin-bottom: 10px;
+}
+
+.pdf-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  color: #4a5568;
+  margin-bottom: 12px;
+}
+
+.pdf-author strong {
+  color: #1a1e24;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.pdf-seal {
+  display: inline-block;
+  border: 1.2px solid #b33939;
+  color: #b33939;
+  padding: 1px 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 3px;
+  letter-spacing: 0.1em;
+}
+
+.pdf-divider {
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #8c734b, transparent);
+  margin: 0 auto;
+}
+
+.pdf-sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #718096;
+  letter-spacing: 0.15em;
+  padding-bottom: 8px;
+}
+
+.pdf-sub-title {
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.pdf-sub-author {
+  color: #8c734b;
+}
+
+.pdf-sub-divider {
+  width: 100%;
+  height: 1px;
+  background: #e2e8f0;
+  margin-bottom: 18px;
+}
+
+.pdf-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.pdf-body p {
+  font-size: 13.5px;
+  color: #24292e;
+  text-align: justify;
+  text-indent: 2em;
+  margin-bottom: 12px;
+  line-height: 1.85;
+  letter-spacing: 0.035em;
+}
+
+.pdf-signature-section {
+  margin-top: 14px;
+  margin-bottom: 10px;
+  padding: 12px 18px;
+  background: #f8fafc;
+  border-left: 3px solid #8c734b;
+  border-radius: 0 6px 6px 0;
+}
+
+.pdf-signature-quote {
+  font-size: 13px;
+  font-style: italic;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+.pdf-signature-author {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2d3748;
+  letter-spacing: 0.1em;
+}
+
+.pdf-page-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #a0aec0;
+  letter-spacing: 0.08em;
+}
+
+.html2pdf__page-break {
+  page-break-after: always;
+  break-after: page;
+}
+
+
