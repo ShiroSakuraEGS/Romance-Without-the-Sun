@@ -884,10 +884,24 @@ html, body {
 /* ==========================================================================
    PDF 輸出專屬排版樣式 (白櫻蒼成 · 散文手稿 · 嚴格 A4 雙頁無損排版)
    ========================================================================== */
+#pdf-export-wrapper {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  width: 794px;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  z-index: -99999;
+  opacity: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
 .pdf-document {
   background: #ffffff;
   color: #1a1e24;
-  font-family: 'Noto Serif TC', 'Songti TC', 'PingFang TC', 'STSong', serif;
+  font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Songti TC', 'PingFang TC', 'STSong', serif;
   box-sizing: border-box;
   width: 794px; /* A4 96 DPI 標準寬度 */
   margin: 0;
