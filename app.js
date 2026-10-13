@@ -83,17 +83,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * 封裝並下載《無日浪漫》手稿 PDF (作者：白櫻蒼成 · 嚴格雙頁無損壓模，絕不截斷文字)
+   * 封裝並下載《無日浪漫》手稿 PDF (作者：白櫻蒼成 · 嚴格雙頁典藏手稿，高解析度且杜絕偏移與空白頁)
    */
   async function exportPdfDocument() {
     const wrapper = document.getElementById("pdf-export-wrapper");
     if (!wrapper) return;
 
-    showToast(`<span>📜</span> 正在為您封裝《無日浪漫》典藏手稿 PDF（作者：白櫻蒼成）...`, 3000);
+    showToast(`<span>📜</span> 正在為您封裝《無日浪漫》典藏手稿 PDF（作者：白櫻蒼成）...`, 3500);
 
     const pdfFilename = "無日浪漫 - 白櫻蒼成.pdf";
 
-    // 暫存原先樣式，並切換至合法可視渲染位置 (fixed top 0，但處於背景深處 z-index -99999)
+    // 暫存原先樣式，並切換至絕對座標原點 (置於負 z-index 背後，避免使用者視覺閃爍)
     const prevStyle = {
       position: wrapper.style.position,
       top: wrapper.style.top,
@@ -105,6 +105,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
+      // 確保 Web Fonts 字型（如 Noto Serif TC）已全數載入，避免字型 fallback 走樣
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
       wrapper.style.position = "fixed";
       wrapper.style.top = "0px";
       wrapper.style.left = "0px";
@@ -131,17 +136,52 @@ document.addEventListener("DOMContentLoaded", () => {
           if (i > 0) {
             pdf.addPage();
           }
+
+          // 對每一頁進行獨立 2x Retina 高清採樣
           const canvas = await window.html2canvas(pages[i], {
-            scale: 2, // 2x Retina 高清採樣
+            scale: 2,
             useCORS: true,
             logging: false,
             backgroundColor: "#ffffff",
             width: 794,
             height: 1123,
-            windowWidth: 794
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 794,
+            windowHeight: 1123,
+            onclone: (clonedDoc, clonedElem) => {
+              // 在克隆環境中將 body 邊界與捲軸完全歸零，徹底杜絕水平與垂直偏移
+              clonedDoc.body.style.margin = "0";
+              clonedDoc.body.style.padding = "0";
+              clonedDoc.body.style.overflow = "visible";
+
+              const clonedWrapper = clonedDoc.getElementById("pdf-export-wrapper");
+              if (clonedWrapper) {
+                clonedWrapper.style.position = "static";
+                clonedWrapper.style.top = "0px";
+                clonedWrapper.style.left = "0px";
+                clonedWrapper.style.margin = "0";
+                clonedWrapper.style.padding = "0";
+                clonedWrapper.style.transform = "none";
+              }
+
+              // 隔離渲染：在克隆樹中只顯示當前渲染頁面，避免兄弟頁面累積縱向坐標差
+              const allPages = clonedDoc.querySelectorAll(".pdf-page");
+              allPages.forEach((p, idx) => {
+                if (idx !== i) {
+                  p.style.display = "none";
+                } else {
+                  p.style.display = "flex";
+                  p.style.margin = "0";
+                }
+              });
+            }
           });
-          const imgData = canvas.toDataURL("image/jpeg", 0.95);
-          // A4 尺寸為 210mm x 297mm，無縫貼合滿版邊界 (內邊距由 CSS 控制)
+
+          const imgData = canvas.toDataURL("image/jpeg", 0.96);
+          // A4 滿版尺寸 (210mm x 297mm)
           pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
         }
 
@@ -153,9 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const opt = {
           margin: 0,
           filename: pdfFilename,
-          image: { type: "jpeg", quality: 0.95 },
-          html2canvas: { scale: 2, useCORS: true, scrollY: 0, width: 794, windowWidth: 794 },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+          image: { type: "jpeg", quality: 0.96 },
+          html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, x: 0, y: 0, width: 794, windowWidth: 794 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all", "css"] }
         };
         await html2pdf().set(opt).from(content).save();
         showToast(`<span>✨</span> 《無日浪漫》典藏手稿 PDF 已成功下載！作者：白櫻蒼成`, 4000);
